@@ -399,39 +399,81 @@ def main():
     ###############################################################################
     with tabs[6]:
         st.subheader("Net Zero Path & ROI Tracker")
-        st.write("Monitor progress toward Net Zero and compare emission reductions vs. financial returns.")
+    st.write("Compare different projects based on carbon reduction and investment costs to prioritize actions.")
 
-        # --- KPI METRICS ---
-        col1, col2 = st.columns(2)
-        col1.metric("Current Net Zero Progress", "22.2% Reduction", "vs 2018 Baseline")
-        col2.metric("Projected ROI from Carbon Savings", "$3.2M", "Based on 2023 Investments")
+    # Sample project data
+    projects = pd.DataFrame({
+        "Project": [
+            "Solar Energy Expansion",
+            "Industrial Energy Efficiency",
+            "Carbon Capture & Storage",
+            "Water Recycling Upgrade",
+            "Fleet Electrification"
+        ],
+        "Investment ($M)": [50, 30, 70, 20, 40],  # Cost per project
+        "Carbon Reduction (kt CO₂)": [300, 180, 500, 120, 250],  # Carbon savings in kilotons
+        "ROI Factor": [3.5, 2.8, 4.2, 2.0, 3.0]  # Hypothetical ROI score
+    })
 
-        # --- EMISSIONS REDUCTION SCENARIO ---
-        st.markdown("### Carbon Reduction vs. Investment")
-        investment = st.slider("Investment in Carbon Reduction Projects ($M)", 0, 100, 20, step=5)
+    # User selection criteria
+    prioritize_by = st.radio(
+        "Prioritize Projects Based On:",
+        ["Max Carbon Reduction", "Best ROI per $ Invested"],
+        horizontal=True
+    )
 
-        # Hypothetical calculation: Each $10M investment = 2% additional reduction
-        reduction_pct = (investment // 10) * 2  # Example formula, replace with real logic
-        projected_reduction = 22.2 + reduction_pct  # Adding to baseline 22.2%
+    # Sort projects based on selection
+    if prioritize_by == "Max Carbon Reduction":
+        projects = projects.sort_values("Carbon Reduction (kt CO₂)", ascending=False)
+    else:
+        projects["ROI per $M"] = projects["ROI Factor"] / projects["Investment ($M)"]
+        projects = projects.sort_values("ROI per $M", ascending=False)
 
-        # Visualization: Progress toward Net Zero
-        fig_progress = px.bar(
-            x=["Current Reduction", "Projected Reduction"],
-            y=[22.2, projected_reduction],
-            text=[f"{22.2}%", f"{projected_reduction}%"],
-            labels={"x": "Scenario", "y": "Total GHG Reduction (%)"},
-            title="Path to Net Zero Emissions",
+    # Display sorted projects
+    st.write("### Recommended Project Prioritization")
+    st.dataframe(projects)
+
+    # Scatter Plot: Investment vs. CO₂ Reduction
+    fig_net_zero = px.scatter(
+        projects,
+        x="Investment ($M)",
+        y="Carbon Reduction (kt CO₂)",
+        size="ROI Factor",
+        color="Project",
+        hover_name="Project",
+        title="Investment vs. Carbon Reduction Potential",
+        labels={"Investment ($M)": "Investment Cost ($M)", "Carbon Reduction (kt CO₂)": "Carbon Reduction (kt CO₂)"},
+        size_max=20
+    )
+    st.plotly_chart(fig_net_zero, use_container_width=True)
+
+    # User Selection: Choose projects to include in strategy
+    selected_projects = st.multiselect(
+        "Select Projects for Your Net Zero Strategy",
+        projects["Project"]
+    )
+
+    if selected_projects:
+        # Filter for selected projects
+        selected_data = projects[projects["Project"].isin(selected_projects)]
+        total_cost = selected_data["Investment ($M)"].sum()
+        total_reduction = selected_data["Carbon Reduction (kt CO₂)"].sum()
+
+        st.write(f"### **Summary for Selected Projects:**")
+        st.write(f"**Total Investment:** ${total_cost}M")
+        st.write(f"**Total Carbon Reduction:** {total_reduction} kt CO₂")
+
+        # Show a bar chart for selected projects
+        fig_selected = px.bar(
+            selected_data,
+            x="Project",
+            y=["Investment ($M)", "Carbon Reduction (kt CO₂)"],
+            barmode="group",
+            title="Investment & CO₂ Reduction of Selected Projects"
         )
-        st.plotly_chart(fig_progress, use_container_width=True)
+        st.plotly_chart(fig_selected, use_container_width=True)
 
-        # --- ROI ESTIMATION ---
-        st.markdown("### Financial Impact of Carbon Reduction")
-        carbon_price = st.slider("Carbon Price ($/ton)", 10, 100, 40, step=5)
-        estimated_savings = investment * (carbon_price / 50)  # Placeholder formula
-
-        st.write(f"Projected **ROI** based on your selected investment: **${estimated_savings:.2f}M**")
-
-        add_footer()
+    add_footer()
 
 ######################
 #     RUN THE APP    #
