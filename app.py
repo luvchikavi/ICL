@@ -135,7 +135,7 @@ def main():
     with col1:
         st.title("ICL ESG Decision-Making Tool")
     with col2:
-        st.image("icl_logo.jpeg", width=120)
+        st.image("https://companieslogo.com/icl-group/logo/", width=120)
 
     # Load Data
     df_ghg, df_water, df_energy, df_waste, df_biod = load_data()
