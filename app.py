@@ -129,31 +129,28 @@ def combined_esg_scenario(ghg_red, water_inv, solar_mw, waste_reuse):
 ###########################
 
 def main():
-    # Streamlit Layout & Title
     st.set_page_config(layout="wide", page_title="ICL ESG Decision Tool")
     
-    col1, col2 = st.columns([0.7, 0.3])  # adjust column widths
+    col1, col2 = st.columns([0.7, 0.3])  # Adjust column widths
     with col1:
         st.title("ICL ESG Decision-Making Tool")
     with col2:
-        st.image("/Users/aviluvchik/app/ICL/icl_logo.jpeg", width=120)
-    #st.markdown(
-    #    "Welcome to the ICL ESG Decision-Making Tool! Use this app to explore and analyze key ESG metrics, "
-    #    "run reduction scenarios, and evaluate the impact of various sustainability initiatives."
-    #)
+        st.image("icl_logo.jpeg", width=120)
 
     # Load Data
     df_ghg, df_water, df_energy, df_waste, df_biod = load_data()
 
-    # TABS
+    # Define tabs inside main()
     tabs = st.tabs([
         "Home / Executive Summary",
         "Climate & GHG",
         "Water & Wastewater",
         "Energy & Efficiency",
         "Circular & Waste",
-        "Biodiversity & Overall"
+        "Biodiversity & Overall",
+        "Net Zero Path & ROI Tracker"  # New tab added here
     ])
+
 
     ###############################################################################
     # TAB 0: HOME / EXECUTIVE SUMMARY
@@ -397,9 +394,47 @@ def main():
 
         add_footer()
 
+###############################################################################
+    # TAB 6: NET ZERO PATH & ROI TRACKER (NEW)
+    ###############################################################################
+    with tabs[6]:
+        st.subheader("Net Zero Path & ROI Tracker")
+        st.write("Monitor progress toward Net Zero and compare emission reductions vs. financial returns.")
+
+        # --- KPI METRICS ---
+        col1, col2 = st.columns(2)
+        col1.metric("Current Net Zero Progress", "22.2% Reduction", "vs 2018 Baseline")
+        col2.metric("Projected ROI from Carbon Savings", "$3.2M", "Based on 2023 Investments")
+
+        # --- EMISSIONS REDUCTION SCENARIO ---
+        st.markdown("### Carbon Reduction vs. Investment")
+        investment = st.slider("Investment in Carbon Reduction Projects ($M)", 0, 100, 20, step=5)
+
+        # Hypothetical calculation: Each $10M investment = 2% additional reduction
+        reduction_pct = (investment // 10) * 2  # Example formula, replace with real logic
+        projected_reduction = 22.2 + reduction_pct  # Adding to baseline 22.2%
+
+        # Visualization: Progress toward Net Zero
+        fig_progress = px.bar(
+            x=["Current Reduction", "Projected Reduction"],
+            y=[22.2, projected_reduction],
+            text=[f"{22.2}%", f"{projected_reduction}%"],
+            labels={"x": "Scenario", "y": "Total GHG Reduction (%)"},
+            title="Path to Net Zero Emissions",
+        )
+        st.plotly_chart(fig_progress, use_container_width=True)
+
+        # --- ROI ESTIMATION ---
+        st.markdown("### Financial Impact of Carbon Reduction")
+        carbon_price = st.slider("Carbon Price ($/ton)", 10, 100, 40, step=5)
+        estimated_savings = investment * (carbon_price / 50)  # Placeholder formula
+
+        st.write(f"Projected **ROI** based on your selected investment: **${estimated_savings:.2f}M**")
+
+        add_footer()
+
 ######################
 #     RUN THE APP    #
 ######################
-
 if __name__ == "__main__":
     main()
