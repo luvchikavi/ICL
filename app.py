@@ -135,7 +135,7 @@ def main():
     with col1:
         st.title("ICL ESG Decision-Making Tool")
     with col2:
-        st.image("https://companieslogo.com/icl-group/logo/", width=120)
+        st.image("icl_logo.jpeg", width=120)
 
     # Load Data
     df_ghg, df_water, df_energy, df_waste, df_biod = load_data()
@@ -394,86 +394,87 @@ def main():
 
         add_footer()
 
-###############################################################################
+    ###############################################################################
     # TAB 6: NET ZERO PATH & ROI TRACKER (NEW)
     ###############################################################################
     with tabs[6]:
         st.subheader("Net Zero Path & ROI Tracker")
-    st.write("Compare different projects based on carbon reduction and investment costs to prioritize actions.")
+        st.write("Compare different projects based on carbon reduction and investment costs to prioritize actions.")
 
-    # Sample project data
-    projects = pd.DataFrame({
-        "Project": [
-            "Solar Energy Expansion",
-            "Industrial Energy Efficiency",
-            "Carbon Capture & Storage",
-            "Water Recycling Upgrade",
-            "Fleet Electrification"
-        ],
-        "Investment ($M)": [50, 30, 70, 20, 40],  # Cost per project
-        "Carbon Reduction (kt CO₂)": [300, 180, 500, 120, 250],  # Carbon savings in kilotons
-        "ROI Factor": [3.5, 2.8, 4.2, 2.0, 3.0]  # Hypothetical ROI score
-    })
+        # Sample project data
+        projects = pd.DataFrame({
+            "Project": [
+                "Solar Energy Expansion",
+                "Industrial Energy Efficiency",
+                "Carbon Capture & Storage",
+                "Water Recycling Upgrade",
+                "Fleet Electrification"
+            ],
+            "Investment ($M)": [50, 30, 70, 20, 40],  # Cost per project
+            "Carbon Reduction (kt CO₂)": [300, 180, 500, 120, 250],  # Carbon savings in kilotons
+            "ROI Factor": [3.5, 2.8, 4.2, 2.0, 3.0]  # Hypothetical ROI score
+        })
 
-    # User selection criteria
-    prioritize_by = st.radio(
-        "Prioritize Projects Based On:",
-        ["Max Carbon Reduction", "Best ROI per $ Invested"],
-        horizontal=True
-    )
-
-    # Sort projects based on selection
-    if prioritize_by == "Max Carbon Reduction":
-        projects = projects.sort_values("Carbon Reduction (kt CO₂)", ascending=False)
-    else:
-        projects["ROI per $M"] = projects["ROI Factor"] / projects["Investment ($M)"]
-        projects = projects.sort_values("ROI per $M", ascending=False)
-
-    # Display sorted projects
-    st.write("### Recommended Project Prioritization")
-    st.dataframe(projects)
-
-    # Scatter Plot: Investment vs. CO₂ Reduction
-    fig_net_zero = px.scatter(
-        projects,
-        x="Investment ($M)",
-        y="Carbon Reduction (kt CO₂)",
-        size="ROI Factor",
-        color="Project",
-        hover_name="Project",
-        title="Investment vs. Carbon Reduction Potential",
-        labels={"Investment ($M)": "Investment Cost ($M)", "Carbon Reduction (kt CO₂)": "Carbon Reduction (kt CO₂)"},
-        size_max=20
-    )
-    st.plotly_chart(fig_net_zero, use_container_width=True)
-
-    # User Selection: Choose projects to include in strategy
-    selected_projects = st.multiselect(
-        "Select Projects for Your Net Zero Strategy",
-        projects["Project"]
-    )
-
-    if selected_projects:
-        # Filter for selected projects
-        selected_data = projects[projects["Project"].isin(selected_projects)]
-        total_cost = selected_data["Investment ($M)"].sum()
-        total_reduction = selected_data["Carbon Reduction (kt CO₂)"].sum()
-
-        st.write(f"### **Summary for Selected Projects:**")
-        st.write(f"**Total Investment:** ${total_cost}M")
-        st.write(f"**Total Carbon Reduction:** {total_reduction} kt CO₂")
-
-        # Show a bar chart for selected projects
-        fig_selected = px.bar(
-            selected_data,
-            x="Project",
-            y=["Investment ($M)", "Carbon Reduction (kt CO₂)"],
-            barmode="group",
-            title="Investment & CO₂ Reduction of Selected Projects"
+        # User selection criteria
+        prioritize_by = st.radio(
+            "Prioritize Projects Based On:",
+            ["Max Carbon Reduction", "Best ROI per $ Invested"],
+            horizontal=True
         )
-        st.plotly_chart(fig_selected, use_container_width=True)
 
-    add_footer()
+        # Sort projects based on selection
+        if prioritize_by == "Max Carbon Reduction":
+            projects = projects.sort_values("Carbon Reduction (kt CO₂)", ascending=False)
+        else:
+            projects["ROI per $M"] = projects["ROI Factor"] / projects["Investment ($M)"]
+            projects = projects.sort_values("ROI per $M", ascending=False)
+
+        # Display sorted projects
+        st.write("### Recommended Project Prioritization")
+        st.dataframe(projects)
+
+        # Scatter Plot: Investment vs. CO₂ Reduction
+        fig_net_zero = px.scatter(
+            projects,
+            x="Investment ($M)",
+            y="Carbon Reduction (kt CO₂)",
+            size="ROI Factor",
+            color="Project",
+            hover_name="Project",
+            title="Investment vs. Carbon Reduction Potential",
+            labels={"Investment ($M)": "Investment Cost ($M)", "Carbon Reduction (kt CO₂)": "Carbon Reduction (kt CO₂)"},
+            size_max=20
+        )
+        st.plotly_chart(fig_net_zero, use_container_width=True)
+
+        # User Selection: Choose projects to include in strategy
+        selected_projects = st.multiselect(
+            "Select Projects for Your Net Zero Strategy",
+            projects["Project"]
+        )
+
+        if selected_projects:
+            # Filter for selected projects
+            selected_data = projects[projects["Project"].isin(selected_projects)]
+            total_cost = selected_data["Investment ($M)"].sum()
+            total_reduction = selected_data["Carbon Reduction (kt CO₂)"].sum()
+
+            st.write(f"### **Summary for Selected Projects:**")
+            st.write(f"**Total Investment:** ${total_cost}M")
+            st.write(f"**Total Carbon Reduction:** {total_reduction} kt CO₂")
+
+            # Show a bar chart for selected projects
+            fig_selected = px.bar(
+                selected_data,
+                x="Project",
+                y=["Investment ($M)", "Carbon Reduction (kt CO₂)"],
+                barmode="group",
+                title="Investment & CO₂ Reduction of Selected Projects"
+            )
+            st.plotly_chart(fig_selected, use_container_width=True)
+
+        add_footer()
+
 
 ######################
 #     RUN THE APP    #
